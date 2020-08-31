@@ -1,0 +1,23 @@
+{
+  "name": "hermes",
+  "version": "1.0.0",
+  "description": "Social network based on Reddit post system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ergonar/hermes.git"
+  },
+  "keywords": [
+    "reddit",
+    "posts"
+  ],
+  "author": "Giovanni Ruiz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ergonar/hermes/issues"
+  },
+  "homepage": "https://github.com/ergonar/hermes#readme"
+}
