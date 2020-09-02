@@ -3,7 +3,8 @@
     "target": "es5",
     "module": "commonjs",
     "outDir": "lib",
-    "sourceMap": true
+    "sourceMap": true,
+    "esModuleInterop": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "*src/**/*.test.ts"]

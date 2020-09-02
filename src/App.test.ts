@@ -1,5 +1,5 @@
-import * as request from 'supertest';
-import app from './App';
+import request from 'supertest';
+import app from './app';
 
 describe('Test the root path', () => {
   it('should call GET method with state of 200', async () => {
