@@ -1,22 +1,20 @@
-import * as express from 'express';
+const express = require('express');
 
-class App {
-  public express;
+import config from './config';
 
-  constructor() {
-    this.express = express();
-    this.mountRoutes();
-  }
+async function startServer() {
+  const app = express();
 
-  private mountRoutes(): void {
-    const router = express.Router();
-    router.get('/', (req, res) => {
-      res.json({
-        message: 'Hello Typescript',
-      });
-    });
-    this.express.use('/', router);
-  }
+  await require('./loaders').default({ expressApp: app });
+
+  app.listen(config.port, '0.0.0.0', error => {
+    if (error) {
+      console.log(error);
+      process.exit(1);
+    }
+
+    console.log(`Running on port ${config.port}`);
+  });
 }
 
-export default new App().express;
+startServer();
