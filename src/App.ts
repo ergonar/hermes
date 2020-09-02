@@ -7,7 +7,7 @@ async function startServer() {
 
   await require('./loaders').default({ expressApp: app });
 
-  app.listen(config.port, '0.0.0.0', error => {
+  const server = app.listen(config.port, '0.0.0.0', error => {
     if (error) {
       console.log(error);
       process.exit(1);
@@ -15,6 +15,10 @@ async function startServer() {
 
     console.log(`Running on port ${config.port}`);
   });
+
+  return server;
 }
 
-startServer();
+const server = startServer();
+
+export default server;
