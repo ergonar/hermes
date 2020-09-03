@@ -4,15 +4,20 @@ import app from './app';
 describe('Test the root path', () => {
   let server;
 
-  beforeAll(() => {
-    app
-      .then(appServer => (server = appServer))
-      .catch(error => console.log(error));
+  beforeAll(async () => {
+    try {
+      server = await app;
+    } catch (error) {
+      console.log(error);
+    }
   });
 
-  afterAll(() => {
-    // Close app
-    // Refactor app initialization so that when it starts test mode, it uses a random available port
+  afterAll(async () => {
+    try {
+      await server.close();
+    } catch (error) {
+      console.log('Error while closing the server', error);
+    }
   });
 
   it('should call GET method with state of 200', async () => {

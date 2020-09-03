@@ -12,6 +12,8 @@ export default {
   databaseUrl: process.env.DATABASE_URL,
   databasePassword: process.env.DATABASE_PASSWORD,
 
+  mongoTestUrl: process.env.MONGO_URL,
+
   api: {
     prefix: '/api',
   },
