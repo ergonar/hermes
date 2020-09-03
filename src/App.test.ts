@@ -10,6 +10,11 @@ describe('Test the root path', () => {
       .catch(error => console.log(error));
   });
 
+  afterAll(() => {
+    // Close app
+    // Refactor app initialization so that when it starts test mode, it uses a random available port
+  });
+
   it('should call GET method with state of 200', async () => {
     expect.assertions(1);
     const response = await request(server).get('/api/first/hey');

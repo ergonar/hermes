@@ -9,6 +9,9 @@ if (envFound.error) {
 export default {
   port: process.env.PORT,
 
+  databaseUrl: process.env.DATABASE_URL,
+  databasePassword: process.env.DATABASE_PASSWORD,
+
   api: {
     prefix: '/api',
   },
