@@ -9,7 +9,7 @@ describe('Test the root path', () => {
     try {
       server = await app;
     } catch (error) {
-      logger.error(error);
+      logger.error('Error while initializing the server', error);
     }
   });
 

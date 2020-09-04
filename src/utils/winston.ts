@@ -71,7 +71,6 @@ if (process.env.NODE_ENV === 'test') {
       format: combine(label({ label: 'Test' }), timestamp(), messageFormat),
     })
   );
-  logger.info('–––––Starting Test–––––');
 }
 
 export default logger;

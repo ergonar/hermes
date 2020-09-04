@@ -17,8 +17,6 @@ async function startServer() {
     logger.info(`Running on port ${config.port}`);
   });
 
-  throw new Error();
-
   return server;
 }
 
