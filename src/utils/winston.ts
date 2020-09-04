@@ -29,7 +29,16 @@ const logger = createLogger({
     }),
   ],
   exceptionHandlers: [
-    new transports.File({ filename: './src/log/exceptions.log' }),
+    new transports.DailyRotateFile({
+      datePattern: 'DD-MM-YYY',
+      filename: `exceptions.%DATE%.log`,
+      dirname: './src/log/',
+      format: combine(
+        label({ label: 'Exceptions' }),
+        timestamp(),
+        messageFormat
+      ),
+    }),
   ],
   exitOnError: false,
 });
