@@ -1,5 +1,6 @@
 import request from 'supertest';
 import app from './app';
+import logger from './utils/winston';
 
 describe('Test the root path', () => {
   let server;
@@ -8,7 +9,7 @@ describe('Test the root path', () => {
     try {
       server = await app;
     } catch (error) {
-      console.log(error);
+      logger.error(error);
     }
   });
 
@@ -16,7 +17,7 @@ describe('Test the root path', () => {
     try {
       await server.close();
     } catch (error) {
-      console.log('Error while closing the server', error);
+      logger.error('Error while closing the server', error);
     }
   });
 

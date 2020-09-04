@@ -1,6 +1,8 @@
 import mongoose, { Mongoose } from 'mongoose';
 import { Db } from 'mongodb';
+
 import config from '../config';
+import logger from './../utils/winston';
 
 const databaseUrl = config.databaseUrl.replace(
   '<PASSWORD>',
@@ -25,7 +27,7 @@ export const mongooseDatabase = async (
     const connection = await connect(url);
     return connection.connection.db;
   } catch (error) {
-    console.log('Error while connecting to mongo database');
+    logger.error('Error while connecting to mongo database');
     throw new Error(error);
   }
 };
@@ -37,7 +39,7 @@ export const mongooseConnection = async (
     const connection = await connect(url);
     return connection;
   } catch (error) {
-    console.log('Error while connecting to mongo database');
+    logger.error('Error while connecting to mongo database');
     throw new Error(error);
   }
 };

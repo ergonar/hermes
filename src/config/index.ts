@@ -1,20 +1,32 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-const envFound = dotenv.config({ path: path.join(__dirname, 'config.env') });
-if (envFound.error) {
-  throw new Error('Could not find .env file');
-}
+import logger from '../utils/winston';
 
-export default {
-  port: process.env.PORT,
+const loadEnvVariables = () => {
+  try {
+    const envFound = dotenv.config({
+      path: path.join(__dirname, 'config.env'),
+    });
+    if (envFound.error) {
+      throw new Error(`${envFound.error}`);
+    }
 
-  databaseUrl: process.env.DATABASE_URL,
-  databasePassword: process.env.DATABASE_PASSWORD,
+    return {
+      port: process.env.PORT,
 
-  mongoTestUrl: process.env.MONGO_URL,
+      databaseUrl: process.env.DATABASE_URL,
+      databasePassword: process.env.DATABASE_PASSWORD,
 
-  api: {
-    prefix: '/api',
-  },
+      mongoTestUrl: process.env.MONGO_URL,
+
+      api: {
+        prefix: '/api',
+      },
+    };
+  } catch (error) {
+    logger.error(`Error while initializing .env variables\n`, error);
+  }
 };
+
+export default loadEnvVariables();

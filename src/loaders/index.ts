@@ -1,14 +1,20 @@
 import expressLoader from './express';
 import { mongooseDatabase as mongooseLoader } from './mongoose';
+import subscribersLoader from './subscribers';
+
+import logger from '../utils/winston';
 
 export default async ({ expressApp }) => {
   try {
+    subscribersLoader();
+    logger.info('Subscribers Loaded!');
+
     expressLoader({ app: expressApp });
-    console.log('Express Initialized!');
+    logger.info('Express Initialized!');
 
     await mongooseLoader();
-    console.log('Database loaded and connected!');
+    logger.info('Database Loaded and Connected!');
   } catch (error) {
-    console.log(error);
+    logger.error('Error while initializing loaders: ', error);
   }
 };

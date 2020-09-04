@@ -5,9 +5,10 @@
   "private": true,
   "main": "app.js",
   "scripts": {
-    "test": "jest --runInBand --detectOpenHandles",
+    "test": "NODE_ENV=test jest --runInBand --detectOpenHandles",
     "dev": "nodemon server.js",
     "start": "npm run build:live",
+    "start:prod": "NODE_ENV=production npm run build:live",
     "build": "tsc -p .",
     "build:live": "nodemon --watch 'src/**/*.ts' --exec \"ts-node\" src/app.ts"
   },
@@ -42,7 +43,9 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "lodash": "^4.17.20",
-    "mongoose": "^5.10.2"
+    "mongoose": "^5.10.2",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.0"
   },
   "engines": {
     "node": "^10"
