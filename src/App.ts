@@ -20,6 +20,4 @@ async function startServer() {
   return server;
 }
 
-const server = startServer();
-
-export default server;
+export default startServer();
