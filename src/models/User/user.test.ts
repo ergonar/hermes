@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { Db } from 'mongodb';
 
 import { mongooseConnection as mongooseLoader } from './../../loaders/mongoose';
 
@@ -48,6 +47,13 @@ describe('Insert Users', () => {
     await expect(user.save()).rejects.toThrow(mongoose.Error.ValidationError);
   });
 
+  it('should fail when given an incorrect email', async () => {
+    expect.assertions(1);
+    const user = User.build(incorrectEmailFormatMock);
+
+    await expect(user.save()).rejects.toThrow(mongoose.Error.ValidationError);
+  });
+
   const completeUserMock = {
     username: 'John',
     password: 'somePassword',
@@ -62,6 +68,15 @@ describe('Insert Users', () => {
     password: 'somePassword',
     passwordConfirm: 'aDifferentPassword',
     email: 'email@email.com',
+    passwordResetToken: 'passwordResetToken',
+    passwordResetExpires: new Date(),
+  };
+
+  const incorrectEmailFormatMock = {
+    username: 'John',
+    password: 'somePassword',
+    passwordConfirm: 'somePassword',
+    email: 'emailemail.com',
     passwordResetToken: 'passwordResetToken',
     passwordResetExpires: new Date(),
   };
