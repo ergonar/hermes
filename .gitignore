@@ -103,5 +103,5 @@ dist
 # TernJS port file
 .tern-port
 
-# jest files
+# mongo-jest files
 globalConfig.json
