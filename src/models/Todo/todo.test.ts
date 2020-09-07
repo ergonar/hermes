@@ -1,7 +1,9 @@
 import { mongooseConnection as mongooseLoader } from './../../loaders/mongoose';
-import config from './../../config';
 
-describe('insert', () => {
+import config from './../../config';
+import Todo from './todo';
+
+describe('Code base for testing mongoose schema', () => {
   let connection;
   let database;
 
@@ -14,14 +16,18 @@ describe('insert', () => {
     await connection.close();
   });
 
-  it('should insert a doc into collection', async () => {
-    expect.assertions(1);
-    const users = database.collection('users');
+  it('should create and save todo successfully', async () => {
+    expect.assertions(3);
+    const mockTodo = {
+      title: 'Some Title',
+      description: 'Some Description',
+    };
+    const todo = Todo.build(mockTodo);
+    await todo.save();
 
-    const mockUser = { _id: 'some-user-id', name: 'John' };
-    const user = await users.insertOne(mockUser);
-
-    const insertedUser = await users.findOne({ _id: 'some-user-id' });
-    expect(insertedUser).toEqual(mockUser);
+    const savedTodo = await Todo.findOne({ title: 'Some Title' });
+    expect(savedTodo._id).toBeDefined();
+    expect(savedTodo.title).toBe(mockTodo.title);
+    expect(savedTodo.description).toBe(mockTodo.description);
   });
 });
