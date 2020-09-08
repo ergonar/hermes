@@ -12,6 +12,10 @@ describe('Insert Users', () => {
     connection = await mongooseLoader(config.mongoTestUrl);
   });
 
+  afterEach(async () => {
+    await User.deleteMany({});
+  });
+
   afterAll(async () => {
     await connection.close();
   });
@@ -52,6 +56,25 @@ describe('Insert Users', () => {
     const user = User.build(incorrectEmailFormatMock);
 
     await expect(user.save()).rejects.toThrow(mongoose.Error.ValidationError);
+  });
+
+  it('should correctly hash the created user password', async () => {
+    expect.assertions(3);
+    const user = User.build(completeUserMock);
+    await user.save();
+
+    const savedUser = await User.findOne({
+      username: completeUserMock.username,
+    }).select('+password');
+
+    const userPasswordIsCorrect = savedUser.correctPassword(
+      completeUserMock.password,
+      savedUser.password
+    );
+
+    expect(savedUser.password).toBeDefined();
+    expect(savedUser.password).not.toBe(completeUserMock.password);
+    expect(userPasswordIsCorrect).toBeTruthy();
   });
 
   const completeUserMock = {

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import validator from 'validator';
+import bcrypt from 'bcryptjs';
 
 import UserInterface from './UserInterface';
 import UserDocument from './UserDocument';
@@ -58,6 +59,33 @@ const userSchema = new mongoose.Schema({
 
 userSchema.statics.build = (attr: UserInterface) => {
   return new User(attr);
+};
+
+userSchema.pre<UserDocument>('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  this.password = await bcrypt.hash(this.password, 8);
+  this.passwordConfirm = undefined;
+  next();
+});
+
+userSchema.pre<UserDocument>('save', function (next) {
+  // Whenever the document is updated, set updatedAt to now.
+  if (!this.isModified()) {
+    return next();
+  }
+
+  this.updatedAt = new Date();
+  next();
+});
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword: string,
+  userPassword: string
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 const User = mongoose.model<UserDocument, UserModel>('User', userSchema);
