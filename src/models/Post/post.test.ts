@@ -5,15 +5,16 @@ import { mongooseConnection as mongooseLoader } from './../../loaders/mongoose';
 import config from './../../config';
 import Post from './post';
 import User from './../User/user';
-import logger from '../../utils/winston';
 
 describe('Insert Posts', () => {
   let connection;
-  let database;
 
   beforeAll(async () => {
     connection = await mongooseLoader(config.mongoTestUrl);
-    database = connection.connection.db;
+  });
+
+  afterEach(async () => {
+    await Post.deleteMany({});
   });
 
   afterAll(async () => {
@@ -42,6 +43,7 @@ describe('Insert Posts', () => {
 
   it('should fail when given non existing user id', async () => {
     try {
+      expect.assertions(1);
       const user = { _id: '5f56b416f3071cd5cbe364a4' };
       const mockPost = createMockPostData(user);
 
@@ -49,7 +51,6 @@ describe('Insert Posts', () => {
       await post.save();
     } catch (error) {
       expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
-      console.log(error);
     }
   });
 
