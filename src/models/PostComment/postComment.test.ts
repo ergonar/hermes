@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 import { mongooseConnection as mongooseLoader } from './../../loaders/mongoose';
 
 import config from './../../config';
@@ -83,5 +81,49 @@ describe('Insert Post Comments', () => {
     expect(savedChildPostComment.isEdited).toBeFalsy();
   });
 
-  it('should create and save a post comment with a children and a parent', () => {});
+  //
+  //  This process consists on:
+  //    Creating a Parent Comment   (Comment 1)
+  //    Creating a Child Comment    (Comment 1.1)
+  //    Creating a Grandson Comment (Comment 1.1.1)
+  //    Make sure that:
+  //      The Parent has the Child comment linked (foreign key).
+  //      The Child has the Parent and Grandson linked (foreign key).
+  //      The Grandson has the Child linked (foreign key).
+  //
+  it('should create and save a post comment with a children and a parent', async () => {
+    expect.assertions(9);
+    let parentPostComment = await createParentCommentPost();
+    let childPostComment = await createChildCommentPost(parentPostComment);
+    const grandsonPostComment = await createChildCommentPost(childPostComment);
+
+    // Since the post comments foreign keys were updated in the database while creating their children,
+    // the variables we have are outdated.
+    parentPostComment = await PostComment.findById(parentPostComment._id);
+    childPostComment = await PostComment.findById(childPostComment._id);
+
+    expect(parentPostComment._id).toBeDefined();
+    expect(childPostComment._id).toBeDefined();
+    expect(grandsonPostComment._id).toBeDefined();
+
+    // Parent has the Child comment linked (foreign key).
+    expect(parentPostComment.parent_comment_id).toBeUndefined();
+    expect(parentPostComment.child_comment_id).toStrictEqual(
+      childPostComment._id.toString()
+    );
+
+    // Child has the Parent and Grandson linked (foreign key).
+    expect(childPostComment.parent_comment_id).toStrictEqual(
+      parentPostComment._id.toString()
+    );
+    expect(childPostComment.child_comment_id).toStrictEqual(
+      grandsonPostComment._id.toString()
+    );
+
+    // Grandson has the Child linked (foreign key).
+    expect(grandsonPostComment.parent_comment_id).toStrictEqual(
+      childPostComment._id.toString()
+    );
+    expect(grandsonPostComment.child_comment_id).toBeUndefined();
+  });
 });
