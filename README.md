@@ -98,14 +98,15 @@ junk/poc
   - [x] Create Post Model
   - [x] Create Schema
   - [x] Create Tests
-- [ ] PostComment
+- [x] PostComment
   - [x] Create PostComment Interface
   - [x] Create PostComment Document
   - [x] Create PostComment Model
   - [x] Create Schema
-  - [ ] Create Tests
-- [ ] Create Mock Model Creators for Tests
+  - [x] Create Tests
+- [x] Create Mock Data Creators for Tests
   - [x] User Mock
-  - [ ] Post Mock
-  - [ ] PostComment Mock
+  - [x] Post Mock
+  - [x] PostComment Mock
+- [x] Create helpers to create entries in mongoose using mock data
 - [ ] JWT
