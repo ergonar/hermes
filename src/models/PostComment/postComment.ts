@@ -54,6 +54,9 @@ postCommentSchema.statics.build = (attr: PostCommentInterface) => {
   return new PostComment(attr);
 };
 
+//
+//  Validator to check if the post exists
+//
 postCommentSchema.pre<PostCommentDocument>('save', function (next) {
   Post.countDocuments({ _id: this.post_id }, (error, count) => {
     if (count === 0) {
@@ -67,6 +70,32 @@ postCommentSchema.pre<PostCommentDocument>('save', function (next) {
     }
     next();
   });
+});
+
+//
+//  When appending a children comment, update the Parent's 'children_comment_id'
+//
+postCommentSchema.pre<PostCommentDocument>('save', function (next) {
+  if (this.parent_comment_id === undefined) {
+    return next();
+  }
+
+  PostComment.findOne(
+    { _id: this.parent_comment_id },
+    async (error, parentPostComment) => {
+      if (parentPostComment === undefined || error) {
+        next(
+          new Error(
+            'Error while creating a Child Post: Parent Post Comment not found'
+          )
+        );
+      }
+
+      parentPostComment.child_comment_id = this._id;
+      await parentPostComment.save();
+      next();
+    }
+  );
 });
 
 const PostComment = mongoose.model<PostCommentDocument, PostCommentModel>(
