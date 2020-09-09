@@ -105,3 +105,6 @@ dist
 
 # mongo-jest files
 globalConfig.json
+
+# VSCode Worplace
+.vscode/*
