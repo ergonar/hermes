@@ -1,4 +1,6 @@
-interface PostCommentInterface {
+import mongoose from 'mongoose';
+
+interface PostCommentDocument extends mongoose.Document {
   post_id: string;
   child_comment_id: string;
   parent_comment_id: string;
@@ -10,4 +12,4 @@ interface PostCommentInterface {
   isEdited?: boolean;
 }
 
-export default PostCommentInterface;
+export default PostCommentDocument;
