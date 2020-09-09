@@ -61,6 +61,8 @@ fix/foo
 junk/poc
 ```
 
+![Branching Structure](https://i.stack.imgur.com/tjJCt.png)
+
 ## Project Planning
 
 - [x] Create Github Repo
