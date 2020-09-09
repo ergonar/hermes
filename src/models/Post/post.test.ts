@@ -1,8 +1,14 @@
 import mongoose from 'mongoose';
 
 import { mongooseConnection as mongooseLoader } from './../../loaders/mongoose';
-
 import config from './../../config';
+
+import {
+  createCorrectPostMock,
+  createPostMockWithRandomUUID,
+} from '../../../test/mock/postMock';
+import { createUser } from '../../../test/mock/modelsMock';
+
 import Post from './post';
 import User from './../User/user';
 
@@ -14,6 +20,7 @@ describe('Insert Posts', () => {
   });
 
   afterEach(async () => {
+    await User.deleteMany({});
     await Post.deleteMany({});
   });
 
@@ -24,7 +31,7 @@ describe('Insert Posts', () => {
   it('should create and save a Post successfully', async () => {
     expect.assertions(9);
     const user = await createUser();
-    const mockPost = createMockPostData(user);
+    const mockPost = createCorrectPostMock(user);
 
     const post = Post.build(mockPost);
     await post.save();
@@ -44,8 +51,7 @@ describe('Insert Posts', () => {
   it('should fail when given non existing user id', async () => {
     try {
       expect.assertions(1);
-      const user = { _id: '5f56b416f3071cd5cbe364a4' };
-      const mockPost = createMockPostData(user);
+      const mockPost = createPostMockWithRandomUUID();
 
       const post = Post.build(mockPost);
       await post.save();
@@ -53,30 +59,4 @@ describe('Insert Posts', () => {
       expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
     }
   });
-
-  const createUser = async () => {
-    const user = User.build(userMock);
-    return await user.save();
-  };
-
-  const userMock = {
-    username: 'John Smith',
-    password: 'somePassword',
-    passwordConfirm: 'somePassword',
-    email: 'john@email.com',
-    passwordResetToken: 'passwordResetToken',
-    passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000), // Ten days from now on
-  };
-
-  const createMockPostData = user => {
-    return {
-      user_id: user._id,
-      title: 'Post title',
-      content: 'Post content',
-      upvotes: 20,
-      downvotes: 4,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-  };
 });
