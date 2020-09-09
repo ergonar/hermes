@@ -4,7 +4,7 @@ import UserDocument from './UserDocument';
 import UserInterface from './UserInterface';
 
 interface UserModel extends mongoose.Model<UserDocument> {
-  build(attr: UserInterface);
+  build(attr: UserInterface): UserDocument;
 }
 
 export default UserModel;
