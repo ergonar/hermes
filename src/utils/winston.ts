@@ -18,14 +18,24 @@ const logger = createLogger({
       filename: `error.%DATE%.log`,
       dirname: './src/log/',
       level: 'error',
-      format: combine(label({ label: 'Error' }), timestamp(), messageFormat),
+      format: combine(
+        format.splat(),
+        label({ label: 'Error' }),
+        timestamp(),
+        messageFormat
+      ),
     }),
     new transports.DailyRotateFile({
       datePattern: 'DD-MM-YYY',
       filename: `combined.%DATE%.log`,
       dirname: './src/log/',
       level: 'debug',
-      format: combine(label({ label: 'Combined' }), timestamp(), messageFormat),
+      format: combine(
+        format.splat(),
+        label({ label: 'Combined' }),
+        timestamp(),
+        messageFormat
+      ),
     }),
   ],
   exceptionHandlers: [
@@ -34,6 +44,7 @@ const logger = createLogger({
       filename: `exceptions.%DATE%.log`,
       dirname: './src/log/',
       format: combine(
+        format.splat(),
         label({ label: 'Exceptions' }),
         timestamp(),
         messageFormat
@@ -52,6 +63,7 @@ if (process.env.NODE_ENV !== 'production') {
     new transports.Console({
       format: combine(
         format.colorize(),
+        format.splat(),
         label({ label: 'Dev' }),
         timestamp(),
         messageFormat
@@ -68,7 +80,12 @@ if (process.env.NODE_ENV === 'test') {
       filename: `test.%DATE%.log`,
       dirname: './src/log/',
       level: 'debug',
-      format: combine(label({ label: 'Test' }), timestamp(), messageFormat),
+      format: combine(
+        format.splat(),
+        label({ label: 'Test' }),
+        timestamp(),
+        messageFormat
+      ),
     })
   );
 }
