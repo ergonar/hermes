@@ -65,6 +65,8 @@ junk/poc
 
 ## Project Planning
 
+### Starting up
+
 - [x] Create Github Repo
 - [x] Implement babel
 - [x] Create Project Structure
@@ -75,18 +77,10 @@ junk/poc
 - [x] Implement .env config parser
 - [x] Create npm scripts
 - [x] Run tests successfully with new structure
+
+### Database
+
 - [x] Create test database schema
-- [x] Create branching structure and naming conventions
-- [x] Create Loaders
-  - [x] Express Loader
-  - [x] Mongoose Loader
-  - [x] Test Loaders
-  - [x] Refactor mongoose loader for better testing. (Add functionality to close connections)
-- [x] Add Logs for errors
-  - [x] Investigate how to log, types, when, why....
-  - [x] Implement Winston Logger as a utility
-  - [x] Change all logs with Winston logger
-  - [x] Listen to uncaught exceptions and promises
 - [x] User Schema
   - [x] Create User Interface
   - [x] Create User Document
@@ -111,4 +105,64 @@ junk/poc
   - [x] Post Mock
   - [x] PostComment Mock
 - [x] Create helpers to create entries in mongoose using mock data
-- [ ] JWT
+
+### Branching
+
+- [x] Create branching structure and naming conventions
+
+### Loaders
+
+- [x] Create Loaders
+  - [x] Express Loader
+  - [x] Mongoose Loader
+  - [x] Test Loaders
+  - [x] Refactor mongoose loader for better testing. (Add functionality to close connections)
+
+### Logger
+
+- [x] Add Logs for errors
+  - [x] Investigate how to log, types, when, why....
+  - [x] Implement Winston Logger as a utility
+  - [x] Change all logs with Winston logger
+  - [x] Listen to uncaught exceptions and promises
+
+### Authentication
+
+- [ ] Implement Dependency Inversion typedi
+- [ ] Implement JWT user authentication
+  - [ ] Implement cookie-parser npm package
+
+### App Logic
+
+#### Users
+
+- [ ] Create CRUD Operations
+- [ ] Whenever a new user is created, send a verification email
+  - [ ] Search for nodemailer@npm
+
+#### Posts
+
+#### Error Handling
+
+- [ ] Research Error Handling
+- [ ] Create CatchAsync Wrapper
+- [ ] Create Custom Error Handler
+
+### NPM packages
+
+- [ ] cors
+- [ ] Sanitization
+  - [ ] express-mongo-sanitize
+  - [ ] xss-clean
+- [ ] Performance
+  - [ ] compression
+  - [ ] express-rate-limit
+- [ ] Security
+  - [ ] helmet
+  - [ ] hpp
+  - [ ] jsonwebtoken
+- [ ] Dev
+  - [ ] morgan // HTTP Request Logger
+- [ ] Requests
+  - [ ] multer // Handle multipart/form-data, primarily used for uploading files.
+  - [ ] sharp // Process images
