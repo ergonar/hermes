@@ -1,3 +1,4 @@
+import 'reflect-metadata'; // This needs to be the first import to use decorators
 import expressLoader from './express';
 import { mongooseDatabase as mongooseLoader } from './mongoose';
 import subscribersLoader from './subscribers';
