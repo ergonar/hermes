@@ -15,6 +15,10 @@ const loadEnvVariables = () => {
     return {
       port: process.env.PORT,
 
+      jwtSecret: process.env.JWT_SECRET,
+      jwtExpiresIn: process.env.JWT_EXPIRES_IN,
+      jwtCookieExpiresIn: process.env.JWT_COOKIE_EXPIRES_IN,
+
       databaseUrl: process.env.DATABASE_URL,
       databasePassword: process.env.DATABASE_PASSWORD,
 
