@@ -16,7 +16,7 @@ const logger = createLogger({
     new transports.DailyRotateFile({
       datePattern: 'DD-MM-YYY',
       filename: `error.%DATE%.log`,
-      dirname: './src/log/',
+      dirname: './src/log/error',
       level: 'error',
       format: combine(
         format.splat(),
@@ -28,11 +28,11 @@ const logger = createLogger({
     new transports.DailyRotateFile({
       datePattern: 'DD-MM-YYY',
       filename: `combined.%DATE%.log`,
-      dirname: './src/log/',
+      dirname: './src/log/debug',
       level: 'debug',
       format: combine(
         format.splat(),
-        label({ label: 'Combined' }),
+        label({ label: 'Debug' }),
         timestamp(),
         messageFormat
       ),
@@ -42,7 +42,7 @@ const logger = createLogger({
     new transports.DailyRotateFile({
       datePattern: 'DD-MM-YYY',
       filename: `exceptions.%DATE%.log`,
-      dirname: './src/log/',
+      dirname: './src/log/exceptions',
       format: combine(
         format.splat(),
         label({ label: 'Exceptions' }),
@@ -78,7 +78,7 @@ if (process.env.NODE_ENV === 'test') {
     new transports.DailyRotateFile({
       datePattern: 'DD-MM-YYY',
       filename: `test.%DATE%.log`,
-      dirname: './src/log/',
+      dirname: './src/log/test',
       level: 'debug',
       format: combine(
         format.splat(),
