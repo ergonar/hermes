@@ -33,7 +33,7 @@ describe('Insert Users', () => {
 
     const savedUser = await User.findOne({
       username: userMock.username,
-    });
+    }).exec();
 
     expect(savedUser._id).toBeDefined();
     expect(savedUser.createdAt).toBeDefined();
@@ -72,7 +72,9 @@ describe('Insert Users', () => {
 
     const savedUser = await User.findOne({
       username: userMock.username,
-    }).select('+password');
+    })
+      .select('+password')
+      .exec();
 
     const userPasswordIsCorrect = savedUser.correctPassword(
       userMock.password,
