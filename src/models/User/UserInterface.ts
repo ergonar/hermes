@@ -1,4 +1,5 @@
 interface UserInterface {
+  _id?: string;
   username: string;
   password: string;
   passwordConfirm: string;
