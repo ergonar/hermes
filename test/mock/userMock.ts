@@ -10,7 +10,7 @@ export const createCorrectUserMock = (): UserInterface => {
     passwordConfirm: password,
     email: faker.internet.email(),
     passwordResetToken: 'passwordResetToken',
-    passwordResetExpires: faker.date.recent(),
+    passwordResetExpires: faker.date.recent().toString(),
   };
 };
 
