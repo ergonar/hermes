@@ -11,12 +11,15 @@ import {
 } from '../../../test/mock/userMock';
 import AuthService from './AuthService';
 import { createSignupUserMock as createCorrectSignupUserMock } from '../../../test/mock/authService';
+import logger from '../../utils/winston';
 
 describe('Sign up a user', () => {
   let connection;
+  let authService: AuthService;
 
   beforeAll(async () => {
     connection = await mongooseLoader(config.mongoTestUrl);
+    authService = Container.get(AuthService);
   });
 
   afterEach(async () => {
@@ -29,11 +32,10 @@ describe('Sign up a user', () => {
 
   it('should signup a user and create its token', async () => {
     expect.assertions(3);
-    const authService = Container.get(AuthService);
     const userMock = createCorrectUserMock();
     const { user, token } = await authService.signup(userMock);
 
-    expect(user.id).toBeDefined();
+    expect(user._id).toBeDefined();
     expect(user.username).toBeDefined();
     expect(token).toBeDefined();
   });
@@ -41,7 +43,6 @@ describe('Sign up a user', () => {
   it('should fail to signup a non existing user', async () => {
     expect.assertions(3);
     try {
-      const authService = Container.get(AuthService);
       const userMock = createUserMockWithIncorrectEmail();
       await authService.signup(userMock);
     } catch (error) {
@@ -54,10 +55,9 @@ describe('Sign up a user', () => {
   it('should decode user token successfully', async () => {
     expect.assertions(4);
     const { user, token } = await createCorrectSignupUserMock();
-    const authService = Container.get(AuthService);
     const decodedToken = await authService.decodeToken(token);
 
-    expect(decodedToken.id).toBe(user.id);
+    expect(decodedToken._id).toBe(user._id.toString());
     expect(decodedToken.name).toBe(user.username);
     expect(decodedToken.iat).toBeDefined();
     expect(decodedToken.exp).toBeDefined();
@@ -66,7 +66,6 @@ describe('Sign up a user', () => {
   it('should throw error when decoding token with a tampered header', async () => {
     expect.assertions(4);
     try {
-      const authService = Container.get(AuthService);
       let { token } = await createCorrectSignupUserMock();
       const [header, payload, verifySignature] = token.split('.');
       const tamperedHeader = header + 'TAMPERED-HEADER';
@@ -87,7 +86,6 @@ describe('Sign up a user', () => {
   it('should throw error when decoding token with a tampered payload', async () => {
     expect.assertions(2);
     try {
-      const authService = Container.get(AuthService);
       let { token } = await createCorrectSignupUserMock();
       const [header, payload, verifySignature] = token.split('.');
       const tamperedPayload = payload + 'TAMPERED-PAYLOAD';
@@ -106,7 +104,6 @@ describe('Sign up a user', () => {
   it('should throw error when decoding token with a tampered verify signature', async () => {
     expect.assertions(4);
     try {
-      const authService = Container.get(AuthService);
       let { token } = await createCorrectSignupUserMock();
       const [header, payload, verifySignature] = token.split('.');
       const tamperedVerifySignature =
@@ -122,6 +119,57 @@ describe('Sign up a user', () => {
       expect(error).toBeInstanceOf(JsonWebTokenError);
       expect(error.name).toContain('JsonWebTokenError');
       expect(error.message).toBe('invalid signature');
+    }
+  });
+
+  it('should signin user with correct email and password', async () => {
+    expect.assertions(6);
+    const {
+      user: registeredUser,
+      userMock,
+    } = await createCorrectSignupUserMock();
+    const { user, token } = await authService.signin(
+      userMock.email,
+      userMock.password
+    );
+
+    expect(user).toBeDefined();
+    expect(user._id.toString()).toBe(registeredUser.id);
+    expect(user.email).toBe(registeredUser.email);
+    expect(user.password).toBeUndefined();
+    expect(user.active).toBeUndefined();
+    expect(token).toBeDefined();
+  });
+
+  it('should throw error with undefined email', async () => {
+    expect.assertions(2);
+    try {
+      await authService.signin(undefined, undefined);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatch('Error while signing in');
+    }
+  });
+
+  it('should throw error with undefined email and password', async () => {
+    expect.assertions(2);
+    try {
+      const { user: registeredUser } = await createCorrectSignupUserMock();
+      await authService.signin(registeredUser.email, undefined);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatch('Error while signing in');
+    }
+  });
+
+  it('should throw error with incorrect passwords', async () => {
+    expect.assertions(2);
+    try {
+      const { user: registeredUser } = await createCorrectSignupUserMock();
+      await authService.signin(registeredUser.email, 'TAMPERED-PASSWORD');
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toMatch('Incorrect email or password');
     }
   });
 });
