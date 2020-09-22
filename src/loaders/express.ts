@@ -4,6 +4,7 @@ import cors from 'cors';
 
 import routes from '../api';
 import config from '../config';
+import globalErrorHandler from '../controllers/errorController';
 
 export default ({ app }: { app: express.Application }) => {
   app.use(cors());
@@ -11,6 +12,9 @@ export default ({ app }: { app: express.Application }) => {
 
   // Load API Routes
   app.use(config.api.prefix, routes());
+
+  // API Error Handler
+  app.use(globalErrorHandler);
 
   return app;
 };
