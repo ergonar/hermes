@@ -20,6 +20,7 @@ const logger = createLogger({
       level: 'error',
       format: combine(
         format.splat(),
+        format.simple(),
         label({ label: 'Error' }),
         timestamp(),
         messageFormat
@@ -32,6 +33,7 @@ const logger = createLogger({
       level: 'debug',
       format: combine(
         format.splat(),
+        format.simple(),
         label({ label: 'Debug' }),
         timestamp(),
         messageFormat
@@ -45,6 +47,7 @@ const logger = createLogger({
       dirname: './src/log/exceptions',
       format: combine(
         format.splat(),
+        format.simple(),
         label({ label: 'Exceptions' }),
         timestamp(),
         messageFormat
@@ -64,6 +67,7 @@ if (process.env.NODE_ENV !== 'production') {
       format: combine(
         format.colorize(),
         format.splat(),
+        format.simple(),
         label({ label: 'Dev' }),
         timestamp(),
         messageFormat
