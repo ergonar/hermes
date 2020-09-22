@@ -44,7 +44,7 @@ describe('Insert Users', () => {
     expect(savedUser.passwordConfirm).toBeUndefined();
     expect(savedUser.email).toBe(userMock.email.toLowerCase());
     expect(savedUser.passwordResetToken).toBe(userMock.passwordResetToken);
-    expect(savedUser.passwordResetExpires).toStrictEqual(
+    expect(savedUser.passwordResetExpires.toString()).toStrictEqual(
       userMock.passwordResetExpires
     );
   });
