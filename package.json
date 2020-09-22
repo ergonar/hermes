@@ -33,6 +33,7 @@
     "@types/mongoose": "^5.7.36",
     "faker": "^5.1.0",
     "jest": "^26.4.2",
+    "node-mocks-http": "^1.9.0",
     "superagent": "^6.1.0",
     "supertest": "^4.0.2",
     "ts-jest": "^26.3.0",
