@@ -144,9 +144,13 @@ junk/poc
 
 #### Error Handling
 
-- [ ] Research Error Handling
-- [ ] Create CatchAsync Wrapper
-- [ ] Create Custom Error Handler
+- [x] Research Error Handling
+- [x] Create CatchAsync Wrapper
+- [x] Create Custom Error
+- [x] Create Global Error Handler
+- [x] Include Global Error Handler in Loaders
+- [ ] Implement npm@morgan
+- [x] Upgrade Winston to give more insight into errors
 
 ### NPM packages
 
