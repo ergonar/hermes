@@ -6,8 +6,8 @@ import { JWTInterface, JWTUserPayloadInterface } from './JWTInterface';
 import UserInterface from '../../models/User/UserInterface';
 import UserDocument from '../../models/User/UserDocument';
 import User from '../../models/User/user';
-import logger from '../../utils/winston';
 import config from '../../config';
+import APIError from '../../utils/ApiError';
 
 @Service()
 class AuthService {
@@ -25,7 +25,7 @@ class AuthService {
 
       return { user, token };
     } catch (error) {
-      throw new Error('Error while signing up user. ' + error.message);
+      throw new APIError(400, `Error while signing up user. ${error.message}`);
     }
   }
 
@@ -37,13 +37,17 @@ class AuthService {
       const userDocument = await User.findOne({ email })
         .select('+password')
         .exec();
+      if (!userDocument) {
+        throw new APIError(400, 'Incorrect email or password');
+      }
+
       const passwordIsCorrect = await bcrypt.compare(
         password,
         userDocument.password
       );
 
       if (!passwordIsCorrect) {
-        throw new Error('Incorrect email or password');
+        throw new APIError(400, 'Incorrect email or password');
       }
 
       const token = this.generateToken(userDocument);
@@ -54,8 +58,7 @@ class AuthService {
 
       return { user, token };
     } catch (error) {
-      logger.error('Error while signing in: ' + error.message);
-      throw new Error('Error while signing in: ' + error.message);
+      throw new APIError(400, `Error while signing in: ${error.message}`);
     }
   }
 
@@ -78,10 +81,3 @@ class AuthService {
 }
 
 export default AuthService;
-
-// signin / login
-// logout
-// protect routes
-// restrict middleware
-// forgot password
-// reset password
