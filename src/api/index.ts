@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import first from './routes/first';
+import all from './routes/all';
+import auth from './routes/auth';
 
 export default () => {
   const router = Router();
-  first(router);
+  auth(router);
 
+  all(router);
   return router;
 };
