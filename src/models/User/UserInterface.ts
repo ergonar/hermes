@@ -6,8 +6,8 @@ interface UserInterface {
   email: string;
   createdAt?: string;
   updatedAt?: string;
-  passwordResetToken: string;
-  passwordResetExpires: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   active?: boolean;
 }
 
