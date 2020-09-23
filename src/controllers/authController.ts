@@ -17,6 +17,8 @@ export const signup = catchAsync(
 
     const { user, token } = await authService.signup(userBody);
 
+    authService.setJWTCookieToResponse(token, req, res);
+
     return res.status(201).json({
       status: 'success',
       message: 'User created successfully!',
@@ -33,7 +35,7 @@ export const signin = catchAsync(
     next: NextFunction
   ): Promise<Response<any> | void> => {
     const authService = Container.get(AuthService);
-    const { email, password } = req.body.user || {
+    const { email, password } = req.body || {
       email: undefined,
       password: undefined,
     };
@@ -44,6 +46,8 @@ export const signin = catchAsync(
 
     const { user, token } = await authService.signin(email, password);
 
+    authService.setJWTCookieToResponse(token, req, res);
+
     return res.status(200).json({
       status: 'success',
       message: 'User signed in successfully!',
@@ -52,3 +56,11 @@ export const signin = catchAsync(
     });
   }
 );
+
+export const isLoggedIn = catchAsync(() => {});
+export const logout = catchAsync(() => {});
+export const protect = catchAsync(() => {});
+export const restrictTo = catchAsync(() => {});
+export const forgotPassword = catchAsync(() => {});
+export const resetPassword = catchAsync(() => {});
+export const updatePassword = catchAsync(() => {});
