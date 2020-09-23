@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { Service } from 'typedi';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
@@ -62,9 +63,6 @@ class AuthService {
     }
   }
 
-  public forgotPassword() {}
-  public resetPassword() {}
-
   private generateToken(user: UserDocument) {
     const payload: JWTUserPayloadInterface = {
       _id: user.id,
@@ -77,6 +75,22 @@ class AuthService {
 
   public async decodeToken(token: string): Promise<JWTInterface> {
     return await jwt.verify(token, config.jwtSecret);
+  }
+
+  public setJWTCookieToResponse(
+    token: string,
+    req: Request,
+    res: Response
+  ): void {
+    const cookieOptions = {
+      expires: new Date(
+        Date.now() + config.jwtCookieExpiresIn * config.daysToMs
+      ),
+      httpOnly: true, // Cannot be accessed or modified in the browser
+      secure: req.secure || req.header('x-forwarded-proto') === 'https',
+    };
+
+    res.cookie('jwt', token, cookieOptions);
   }
 }
 
