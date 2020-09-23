@@ -128,9 +128,19 @@ junk/poc
 
 ### Authentication
 
-- [ ] Implement Dependency Inversion typedi
-- [ ] Implement JWT user authentication
+- [x] Implement Dependency Inversion typedi
+- [ ] Authentication Service
+  - [x] Create signup functionality
+  - [x] Create sign-in/login functionality
+- [ ] API Route and Controller
+  - [ ] Create signup
+  - [ ] Create sign-in/login
+- [x] Implement JWT user authentication
   - [ ] Implement cookie-parser npm package
+
+### Performance
+
+- [ ] Save in a logger all requests with ping, time (ms)...
 
 ### App Logic
 
@@ -164,7 +174,7 @@ junk/poc
 - [ ] Security
   - [ ] helmet
   - [ ] hpp
-  - [ ] jsonwebtoken
+  - [x] jsonwebtoken
 - [ ] Dev
   - [ ] morgan // HTTP Request Logger
 - [ ] Requests
