@@ -132,9 +132,9 @@ junk/poc
 - [ ] Authentication Service
   - [x] Create signup functionality
   - [x] Create sign-in/login functionality
-- [ ] API Route and Controller
-  - [ ] Create signup
-  - [ ] Create sign-in/login
+- [x] API Route and Controller
+  - [x] Create signup
+  - [x] Create sign-in/login
 - [x] Implement JWT user authentication
   - [ ] Implement cookie-parser npm package
 
