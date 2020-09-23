@@ -12,7 +12,9 @@ import {
 
 describe('Authenticate Users', () => {
   let server;
-  const url = `${config.api.prefix}/auth/signup`;
+  const baseUrl = `${config.api.prefix}/auth`;
+  const signupUrl = `${baseUrl}/signup`;
+  const signinUrl = `${baseUrl}/signin`;
 
   beforeAll(async () => {
     try {
@@ -22,12 +24,20 @@ describe('Authenticate Users', () => {
     }
   });
 
+  afterAll(async () => {
+    try {
+      await server.close();
+    } catch (error) {
+      logger.error('Error while closing the server', error);
+    }
+  });
+
   describe('/signup', () => {
     describe('Method: POST', () => {
       it('should create a user and receive the created user and its token', async () => {
         expect.assertions(7);
         const user: UserInterface = createCorrectSignupUserMock();
-        const response = await request(server).post(url).send({ user });
+        const response = await request(server).post(signupUrl).send({ user });
 
         expect(response.statusCode).toBe(201);
         expect(response.body.status).toBe('success');
@@ -43,18 +53,150 @@ describe('Authenticate Users', () => {
       it('should receive validation error when sending incomplete information', async () => {
         expect.assertions(8);
         const user = createIncompleteSignupUserMock();
-        const response = await request(server).post(url).send({ user });
+        const response = await request(server).post(signupUrl).send({ user });
 
-        expect(response.statusCode).toBe(500);
-        expect(response.body.status).toBe('error');
+        expect(response.statusCode).toBe(400);
+        expect(response.body.status).toBe('fail');
         expect(response.body.message).toMatch(
           'Error while signing up user. User validation failed:'
         );
         expect(response.body.user).toBeUndefined();
         expect(response.body.token).toBeUndefined();
         expect(response.body.error).toBeDefined();
-        expect(response.body.error.statusCode).toBe(500);
-        expect(response.body.error.status).toBe('error');
+        expect(response.body.error.statusCode).toBe(400);
+        expect(response.body.error.status).toBe('fail');
+      });
+    });
+  });
+
+  describe('/signin', () => {
+    let user;
+    let userMock;
+
+    beforeAll(async () => {
+      // Creating a mock user
+      userMock = createCorrectSignupUserMock();
+      await request(server).post(signupUrl).send({ user: userMock });
+    });
+
+    afterAll(async () => {
+      await User.findByIdAndDelete(user._id);
+    });
+
+    describe('Method: POST', () => {
+      it('should signin a user with correct email and password and receive user and token', async () => {
+        expect.assertions(7);
+        const response = await request(server)
+          .post(signinUrl)
+          .send({
+            user: { email: userMock.email, password: userMock.password },
+          });
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body.status).toBe('success');
+        expect(response.body.message).toBe('User signed in successfully!');
+        expect(response.body.user).toBeDefined();
+        expect(response.body.user.username).toBe(userMock.username);
+        expect(response.body.user.email).toBe(userMock.email.toLowerCase());
+        expect(response.body.token).toBeDefined();
+      });
+
+      it('should throw error if a password is given but an email is not', async () => {
+        expect.assertions(8);
+        const response = await request(server)
+          .post(signinUrl)
+          .send({
+            user: { password: userMock.password },
+          });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.status).toBe('fail');
+        expect(response.body.message).toBe(
+          'Please provide an email and password'
+        );
+        expect(response.body.stack).toBeDefined();
+        expect(response.body.user).toBeUndefined();
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.statusCode).toBe(400);
+        expect(response.body.error.status).toBe('fail');
+      });
+
+      it('should throw error if an email is given but a password is not', async () => {
+        expect.assertions(8);
+        const response = await request(server)
+          .post(signinUrl)
+          .send({
+            user: { email: userMock.email },
+          });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.status).toBe('fail');
+        expect(response.body.message).toBe(
+          'Please provide an email and password'
+        );
+        expect(response.body.stack).toBeDefined();
+        expect(response.body.user).toBeUndefined();
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.statusCode).toBe(400);
+        expect(response.body.error.status).toBe('fail');
+      });
+
+      it('should throw error if no data is sent', async () => {
+        expect.assertions(8);
+        const response = await request(server).post(signinUrl);
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.status).toBe('fail');
+        expect(response.body.message).toBe(
+          'Please provide an email and password'
+        );
+        expect(response.body.stack).toBeDefined();
+        expect(response.body.user).toBeUndefined();
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.statusCode).toBe(400);
+        expect(response.body.error.status).toBe('fail');
+      });
+
+      it('should not signin a user with an incorrect email', async () => {
+        expect.assertions(8);
+        const incorrectEmail = 'incorrectMail@gmail.com';
+        const response = await request(server)
+          .post(signinUrl)
+          .send({
+            user: { email: incorrectEmail, password: userMock.password },
+          });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.status).toBe('fail');
+        expect(response.body.message).toBe(
+          'Error while signing in: Incorrect email or password'
+        );
+        expect(response.body.stack).toBeDefined();
+        expect(response.body.user).toBeUndefined();
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.statusCode).toBe(400);
+        expect(response.body.error.status).toBe('fail');
+      });
+
+      it('should not signin a user with an incorrect password', async () => {
+        expect.assertions(8);
+        const incorrectPassword = 'incorrectPassword';
+        const response = await request(server)
+          .post(signinUrl)
+          .send({
+            user: { email: userMock.email, password: incorrectPassword },
+          });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.status).toBe('fail');
+        expect(response.body.message).toBe(
+          'Error while signing in: Incorrect email or password'
+        );
+        expect(response.body.stack).toBeDefined();
+        expect(response.body.user).toBeUndefined();
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.statusCode).toBe(400);
+        expect(response.body.error.status).toBe('fail');
       });
     });
   });
