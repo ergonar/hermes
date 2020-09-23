@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
+import JsonWebTokenError from 'jsonwebtoken/lib/JsonWebTokenError';
 
 import APIError from '../../utils/ApiError';
 import config from '../../config';
@@ -61,8 +62,8 @@ class GlobalErrorHandler {
       error = this.handleDuplicateFieldsDB(error);
     } else if (error.name === 'ValidationError') {
       error = this.handleValidationErrorDB(error);
-      // } else if (error.name === 'JsonWebTokenError') {
-      //   error = handleJWTError();
+    } else if (error.name === 'JsonWebTokenError') {
+      error = this.handleJWTError(error);
       // } else if (error.name === 'TokenExpiredError') {
       //   error = handleJWTExpiredError();
     }
@@ -87,6 +88,10 @@ class GlobalErrorHandler {
     const errors = Object.values(err.errors).map(error => error.message);
     const message = `Invalid input data. ${errors.join('. ')}`;
     return new APIError(400, message);
+  }
+
+  private handleJWTError(error: JsonWebTokenError) {
+    return new APIError(401, 'Invalid token. Please log in again.');
   }
 }
 
