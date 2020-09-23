@@ -18,7 +18,7 @@ const loadEnvVariables = () => {
 
       jwtSecret: process.env.JWT_SECRET,
       jwtExpiresIn: process.env.JWT_EXPIRES_IN,
-      jwtCookieExpiresIn: process.env.JWT_COOKIE_EXPIRES_IN,
+      jwtCookieExpiresIn: Number(process.env.JWT_COOKIE_EXPIRES_IN),
 
       databaseUrl: process.env.DATABASE_URL,
       databasePassword: process.env.DATABASE_PASSWORD,
@@ -28,6 +28,8 @@ const loadEnvVariables = () => {
       api: {
         prefix: '/api',
       },
+
+      daysToMs: 24 * 60 * 60 * 1000,
     };
   } catch (error) {
     logger.error(`Error while initializing .env variables\n`, error);
