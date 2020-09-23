@@ -33,10 +33,22 @@ export const signin = catchAsync(
     next: NextFunction
   ): Promise<Response<any> | void> => {
     const authService = Container.get(AuthService);
-    const { email, password } = req.body.user;
+    const { email, password } = req.body.user || {
+      email: undefined,
+      password: undefined,
+    };
 
     if (!email || !password) {
       return next(new APIError(400, 'Please provide an email and password'));
     }
+
+    const { user, token } = await authService.signin(email, password);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'User signed in successfully!',
+      user,
+      token,
+    });
   }
 );
