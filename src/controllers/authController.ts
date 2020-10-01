@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Container from 'typedi';
+import User from '../models/User/user';
 import UserInterface from '../models/User/UserInterface';
 
 import AuthService from '../services/Auth/AuthService';
@@ -57,9 +58,67 @@ export const signin = catchAsync(
   }
 );
 
-export const isLoggedIn = catchAsync(() => {});
-export const logout = catchAsync(() => {});
-export const protect = catchAsync(() => {});
+export const logout = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Response<any> | void => {
+  try {
+    res.cookie('jwt', 'loggedout', {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+    res.status(200).json({ status: 'success' });
+  } catch (error) {
+    next(new APIError(400, `Error while logging out: ${error.message}`));
+  }
+};
+
+export const protect = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    let token = req.headers.authorization;
+    if (token && token.startsWith('Bearer')) {
+      token = token.split(' ')[1];
+    } else if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    } else {
+      next(
+        new APIError(401, 'You are not logged in. Please log in to get access.')
+      );
+    }
+
+    const authService = Container.get(AuthService);
+    const decodedToken = await authService.decodeToken(token);
+
+    // Check if user still exists
+    const user = await User.findById(decodedToken._id).exec();
+    if (!user) {
+      next(
+        new APIError(401, 'The user belonging to this token no longer exists.')
+      );
+    }
+
+    // Check if user changed password after the token was issued
+    if (user.changedPasswordAfter(decodedToken.iat)) {
+      next(
+        new APIError(
+          401,
+          'The user recently changed its password! Please log in again.'
+        )
+      );
+    }
+
+    // req.user = user
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const restrictTo = catchAsync(() => {});
 export const forgotPassword = catchAsync(() => {});
 export const resetPassword = catchAsync(() => {});

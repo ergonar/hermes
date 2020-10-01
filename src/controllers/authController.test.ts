@@ -1,4 +1,6 @@
 import request from 'supertest';
+import mocks from 'node-mocks-http';
+import JsonWebTokenError from 'jsonwebtoken/lib/JsonWebTokenError';
 
 import app from './../app';
 import config from './../config';
@@ -11,6 +13,13 @@ import {
   createJWTExpirationDateMocks,
   getJWTCookieFromResponse,
 } from '../../test/mock/authMock';
+import * as authController from './authController';
+import Container from 'typedi';
+import AuthService from '../services/Auth/AuthService';
+import APIError from '../utils/ApiError';
+import { createSignupUserMock } from '../../test/mock/authService';
+import { Error } from 'mongoose';
+import { createCorrectUserMock } from '../../test/mock/userMock';
 
 describe('Authenticate Users', () => {
   let server;
@@ -119,7 +128,10 @@ describe('Authenticate Users', () => {
     beforeAll(async () => {
       // Creating a mock user
       userMock = createCorrectSignupUserMock();
-      await request(server).post(signupUrl).send({ user: userMock });
+      const response = await request(server)
+        .post(signupUrl)
+        .send({ user: userMock });
+      user = response.body.user;
     });
 
     afterAll(async () => {
@@ -256,6 +268,140 @@ describe('Authenticate Users', () => {
         expect(response.body.error.statusCode).toBe(400);
         expect(response.body.error.status).toBe('fail');
       });
+    });
+  });
+
+  describe('logout', () => {
+    it('should expire the jwt cookie', async () => {
+      expect.assertions(7);
+      const request = mocks.createRequest();
+      const response = mocks.createResponse();
+      const next = jest.fn();
+
+      const authService = Container.get(AuthService);
+      const token = 'testToken';
+      authService.setJWTCookieToResponse(token, request, response);
+
+      authController.logout(request, response, next);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.cookies.jwt).toBeDefined();
+      expect(response.cookies.jwt.value).toBe('loggedout');
+      expect(response.cookies.jwt.options.expires).toBeDefined();
+      // The cookie should expire around this minute, instead of 90 days from now
+      expect(
+        response.cookies.jwt.options.expires.getMinutes()
+      ).toBeLessThanOrEqual(new Date().getMinutes() + 1);
+      expect(
+        response.cookies.jwt.options.expires.getMinutes()
+      ).toBeGreaterThanOrEqual(new Date().getMinutes() - 1);
+      expect(response.cookies.jwt.options.httpOnly).toBeTruthy();
+    });
+  });
+
+  describe('protect', () => {
+    let user;
+    let token;
+    let userMock;
+
+    beforeAll(async () => {
+      // Creating a mock user
+      const {
+        user: createdUser,
+        token: createdToken,
+      } = await createSignupUserMock();
+      user = createdUser;
+      token = createdToken;
+    });
+
+    afterAll(async () => {
+      await User.findByIdAndDelete(user._id);
+    });
+
+    it('should call next when sending correct token in the Request and the user exists', async () => {
+      expect.assertions(2);
+      const request = mocks.createRequest();
+      const response = mocks.createResponse();
+      const next = jest.fn();
+
+      request.cookies.jwt = token;
+      await authController.protect(request, response, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('should throw error when not sending token in the Request', async () => {
+      expect.assertions(1);
+      const request = mocks.createRequest();
+      const response = mocks.createResponse();
+      const next = jest.fn();
+
+      await authController.protect(request, response, next);
+
+      expect(next).toHaveBeenCalledWith(
+        new APIError(401, 'You are not logged in. Please log in to get access.')
+      );
+    });
+
+    it('should throw error when sending an invalid token in the Request', async () => {
+      expect.assertions(2);
+      const request = mocks.createRequest();
+      const response = mocks.createResponse();
+      const next = jest.fn();
+
+      request.cookies.jwt = token + '.tampering.token';
+      await authController.protect(request, response, next);
+
+      // Expecting invalid token error given by GlobalErrorHandler
+      expect(next).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(new JsonWebTokenError('jwt malformed'));
+    });
+
+    it('should throw error when sending a valid token in the Request but the user does not exist', async () => {
+      expect.assertions(1);
+      const request = mocks.createRequest();
+      const response = mocks.createResponse();
+      const next = jest.fn();
+
+      const {
+        user: userToDelete,
+        token: deletedUserToken,
+      } = await createSignupUserMock();
+      await User.findByIdAndDelete(userToDelete._id);
+
+      request.cookies.jwt = deletedUserToken;
+      await authController.protect(request, response, next);
+
+      expect(next).toHaveBeenCalledWith(
+        new APIError(401, 'The user belonging to this token no longer exists.')
+      );
+    });
+
+    it('should throw error when sending a valid token in the Request but the user password was changed after the token was created', async () => {
+      expect.assertions(1);
+      const request = mocks.createRequest();
+      const response = mocks.createResponse();
+      const next = jest.fn();
+
+      const {
+        user: userToChangePassword,
+        token: correctToken,
+      } = await createSignupUserMock();
+
+      userToChangePassword.password = 'New Password';
+      userToChangePassword.passwordConfirm = 'New Password';
+      await userToChangePassword.save();
+
+      request.cookies.jwt = correctToken;
+      await authController.protect(request, response, next);
+
+      expect(next).toHaveBeenCalledWith(
+        new APIError(
+          401,
+          'The user recently changed its password! Please log in again.'
+        )
+      );
     });
   });
 });
