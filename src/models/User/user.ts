@@ -59,6 +59,11 @@ const userSchema = new mongoose.Schema({
     default: true,
     select: false,
   },
+  role: {
+    type: String,
+    enum: ['admin', 'user'],
+    default: 'user',
+  },
 });
 
 userSchema.statics.build = (attr: UserInterface) => {
@@ -90,7 +95,7 @@ userSchema.methods.correctPassword = async function (
 };
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-  const passwordUpdatedAt = Math.round(this.updatedAt.getTime() / 1000);
+  const passwordUpdatedAt = Math.round(this.passwordUpdatedAt.getTime() / 1000);
 
   return passwordUpdatedAt > JWTTimestamp;
 };

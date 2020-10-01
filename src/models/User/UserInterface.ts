@@ -10,6 +10,7 @@ interface UserInterface {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   active?: boolean;
+  role?: string;
 }
 
 export default UserInterface;
