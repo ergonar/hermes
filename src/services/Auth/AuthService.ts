@@ -82,15 +82,22 @@ class AuthService {
     req: Request,
     res: Response
   ): void {
-    const cookieOptions = {
-      expires: new Date(
-        Date.now() + config.jwtCookieExpiresIn * config.daysToMs
-      ),
-      httpOnly: true, // Cannot be accessed or modified in the browser
-      secure: req.secure || req.header('x-forwarded-proto') === 'https',
-    };
+    try {
+      const cookieOptions = {
+        expires: new Date(
+          Date.now() + config.jwtCookieExpiresIn * config.daysToMs
+        ),
+        httpOnly: true, // Cannot be accessed or modified in the browser
+        secure: req.secure || req.header('x-forwarded-proto') === 'https',
+      };
 
-    res.cookie('jwt', token, cookieOptions);
+      res.cookie('jwt', token, cookieOptions);
+    } catch (error) {
+      throw new APIError(
+        400,
+        `Error while setting jwt cookie: ${error.message}`
+      );
+    }
   }
 }
 
