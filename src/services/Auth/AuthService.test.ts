@@ -1,5 +1,6 @@
 import { Container } from 'typedi';
 import JsonWebTokenError from 'jsonwebtoken/lib/JsonWebTokenError';
+import mocks from 'node-mocks-http';
 
 import { mongooseConnection as mongooseLoader } from '../../loaders/mongoose';
 
@@ -9,6 +10,7 @@ import {
   createCorrectUserMock,
   createUserMockWithIncorrectEmail,
 } from '../../../test/mock/userMock';
+
 import AuthService from './AuthService';
 import { createSignupUserMock as createCorrectSignupUserMock } from '../../../test/mock/authService';
 
@@ -55,75 +57,94 @@ describe('Authenticate a User', () => {
     });
   });
 
-  describe('Token decoding', () => {
-    it('should decode user token successfully', async () => {
-      expect.assertions(4);
-      const { user, token } = await createCorrectSignupUserMock();
-      const decodedToken = await authService.decodeToken(token);
+  describe('Token', () => {
+    describe('decoding', () => {
+      it('should decode user token successfully', async () => {
+        expect.assertions(4);
+        const { user, token } = await createCorrectSignupUserMock();
+        const decodedToken = await authService.decodeToken(token);
 
-      expect(decodedToken._id).toBe(user._id.toString());
-      expect(decodedToken.name).toBe(user.username);
-      expect(decodedToken.iat).toBeDefined();
-      expect(decodedToken.exp).toBeDefined();
+        expect(decodedToken._id).toBe(user._id.toString());
+        expect(decodedToken.name).toBe(user.username);
+        expect(decodedToken.iat).toBeDefined();
+        expect(decodedToken.exp).toBeDefined();
+      });
+
+      it('should throw error when decoding token with a tampered header', async () => {
+        expect.assertions(4);
+        try {
+          let { token } = await createCorrectSignupUserMock();
+          const [header, payload, verifySignature] = token.split('.');
+          const tamperedHeader = header + 'TAMPERED-HEADER';
+
+          const tamperedToken = [tamperedHeader, payload, verifySignature].join(
+            '.'
+          );
+
+          await authService.decodeToken(tamperedToken);
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect(error).toBeInstanceOf(JsonWebTokenError);
+          expect(error.name).toContain('JsonWebTokenError');
+          expect(error.message).toBe('invalid token');
+        }
+      });
+
+      it('should throw error when decoding token with a tampered payload', async () => {
+        expect.assertions(2);
+        try {
+          let { token } = await createCorrectSignupUserMock();
+          const [header, payload, verifySignature] = token.split('.');
+          const tamperedPayload = payload + 'TAMPERED-PAYLOAD';
+
+          const tamperedToken = [header, tamperedPayload, verifySignature].join(
+            '.'
+          );
+
+          await authService.decodeToken(tamperedToken);
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect(error).toBeInstanceOf(SyntaxError);
+        }
+      });
+
+      it('should throw error when decoding token with a tampered verify signature', async () => {
+        expect.assertions(4);
+        try {
+          let { token } = await createCorrectSignupUserMock();
+          const [header, payload, verifySignature] = token.split('.');
+          const tamperedVerifySignature =
+            verifySignature + 'TAMPERED-VERIFY-SIGNATURE';
+
+          const tamperedToken = [header, payload, tamperedVerifySignature].join(
+            '.'
+          );
+
+          await authService.decodeToken(tamperedToken);
+        } catch (error) {
+          expect(error).toBeDefined();
+          expect(error).toBeInstanceOf(JsonWebTokenError);
+          expect(error.name).toContain('JsonWebTokenError');
+          expect(error.message).toBe('invalid signature');
+        }
+      });
     });
 
-    it('should throw error when decoding token with a tampered header', async () => {
-      expect.assertions(4);
-      try {
-        let { token } = await createCorrectSignupUserMock();
-        const [header, payload, verifySignature] = token.split('.');
-        const tamperedHeader = header + 'TAMPERED-HEADER';
+    describe('setting cookie', () => {
+      it('should set jwt cookie to Response object', () => {
+        expect.assertions(5);
+        const request = mocks.createRequest();
+        const response = mocks.createResponse();
+        const token = 'testToken';
 
-        const tamperedToken = [tamperedHeader, payload, verifySignature].join(
-          '.'
-        );
+        authService.setJWTCookieToResponse(token, request, response);
 
-        await authService.decodeToken(tamperedToken);
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(JsonWebTokenError);
-        expect(error.name).toContain('JsonWebTokenError');
-        expect(error.message).toBe('invalid token');
-      }
-    });
-
-    it('should throw error when decoding token with a tampered payload', async () => {
-      expect.assertions(2);
-      try {
-        let { token } = await createCorrectSignupUserMock();
-        const [header, payload, verifySignature] = token.split('.');
-        const tamperedPayload = payload + 'TAMPERED-PAYLOAD';
-
-        const tamperedToken = [header, tamperedPayload, verifySignature].join(
-          '.'
-        );
-
-        await authService.decodeToken(tamperedToken);
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(SyntaxError);
-      }
-    });
-
-    it('should throw error when decoding token with a tampered verify signature', async () => {
-      expect.assertions(4);
-      try {
-        let { token } = await createCorrectSignupUserMock();
-        const [header, payload, verifySignature] = token.split('.');
-        const tamperedVerifySignature =
-          verifySignature + 'TAMPERED-VERIFY-SIGNATURE';
-
-        const tamperedToken = [header, payload, tamperedVerifySignature].join(
-          '.'
-        );
-
-        await authService.decodeToken(tamperedToken);
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error).toBeInstanceOf(JsonWebTokenError);
-        expect(error.name).toContain('JsonWebTokenError');
-        expect(error.message).toBe('invalid signature');
-      }
+        expect(response.cookies.jwt).toBeDefined();
+        expect(response.cookies.jwt.value).toBe(token);
+        expect(response.cookies.jwt.options.httpOnly).toBeTruthy();
+        expect(response.cookies.jwt.options.expires).toBeDefined();
+        expect(response.cookies.jwt.options.secure).toBeDefined();
+      });
     });
   });
 
