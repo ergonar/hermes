@@ -133,10 +133,15 @@ junk/poc
   - [x] Create signup functionality
   - [x] Create sign-in/login functionality
 - [x] API Route and Controller
+  - [x] Implement cookie-parser npm package
   - [x] Create signup
   - [x] Create sign-in/login
+  - [ ] Create protect
+  - [ ] Create restrictTo
+  - [ ] Create forgotPassword
+  - [ ] Create resetPassword
+  - [ ] Create updatePassword
 - [x] Implement JWT user authentication
-  - [ ] Implement cookie-parser npm package
 
 ### Performance
 
