@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import Container from 'typedi';
 import config from '../config';
 import GlobalErrorHandler from '../services/Error/GlobalErrorHandler';
-import APIError from '../utils/ApiError';
 import logger from '../utils/winston';
 
 const errorController = (

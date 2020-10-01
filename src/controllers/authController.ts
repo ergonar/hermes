@@ -119,7 +119,11 @@ export const protect = async (
   }
 };
 
-export const restrictTo = catchAsync(() => {});
+export const restrictTo = catchAsync(() => {
+  // When roles are implemented, receive an array of roles and restrict the access to them 
+});
+
 export const forgotPassword = catchAsync(() => {});
+
 export const resetPassword = catchAsync(() => {});
 export const updatePassword = catchAsync(() => {});
