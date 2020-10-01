@@ -17,5 +17,6 @@ export default async ({ expressApp }) => {
     logger.info('Database Loaded and Connected!');
   } catch (error) {
     logger.error('Error while initializing loaders: ', error);
+    process.exit(1);
   }
 };
