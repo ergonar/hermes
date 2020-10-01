@@ -7,11 +7,13 @@ interface UserDocument extends mongoose.Document {
   email: string;
   createdAt: Date;
   updatedAt: Date;
+  passwordUpdatedAt: Date;
   passwordResetToken: string;
   passwordResetExpires: Date;
   active: boolean;
 
   correctPassword(candidatePassword: string, userPassword: string): boolean;
+  changedPasswordAfter(JWTTimestamp: number): boolean;
 }
 
 export default UserDocument;

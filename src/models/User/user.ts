@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  passwordUpdatedAt: {
+    type: Date,
+    default: Date.now,
+  },
   passwordResetToken: String,
   passwordResetExpires: Date,
   active: {
@@ -62,21 +66,18 @@ userSchema.statics.build = (attr: UserInterface) => {
 };
 
 userSchema.pre<UserDocument>('save', async function (next) {
+  // Only run this function if password was modified
   if (!this.isModified('password')) {
     return next();
   }
 
   this.password = await bcrypt.hash(this.password, 8);
   this.passwordConfirm = undefined;
+  this.passwordUpdatedAt = new Date();
   next();
 });
 
 userSchema.pre<UserDocument>('save', function (next) {
-  // Whenever the document is updated, set updatedAt to now.
-  if (!this.isModified()) {
-    return next();
-  }
-
   this.updatedAt = new Date();
   next();
 });
@@ -86,6 +87,12 @@ userSchema.methods.correctPassword = async function (
   userPassword: string
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  const passwordUpdatedAt = Math.round(this.updatedAt.getTime() / 1000);
+
+  return passwordUpdatedAt > JWTTimestamp;
 };
 
 const User = mongoose.model<UserDocument, UserModel>('User', userSchema);
